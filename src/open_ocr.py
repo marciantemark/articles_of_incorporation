@@ -26,7 +26,8 @@ def extract_text(image_path: Path) -> str:
 def convert_to_markdown(image_path: Path, readable_directory: Path) -> Path:
     text = extract_text(image_path)
     readable_directory.mkdir(parents=True, exist_ok=True)
-    markdown_path = readable_directory / f"{image_path.stem}.md"
+    image_format = image_path.suffix.lstrip(".").lower()
+    markdown_path = readable_directory / f"{image_path.stem}_{image_format}.md"
     content = f"# {image_path.stem.replace('_', ' ')}\n\n"
     content += f"{text}\n" if text else "_No text was recognized in this image._\n"
     markdown_path.write_text(content, encoding="utf-8")

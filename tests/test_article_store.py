@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from src.article_store import image_extension, list_images, save_image
+from src.article_store import download_image, image_extension, list_images, save_image
 from src.open_ocr import convert_to_markdown
 
 
@@ -16,6 +16,11 @@ class ArticleStoreTests(unittest.TestCase):
     def test_rejects_non_images(self):
         with self.assertRaises(ValueError):
             image_extension(b"not an image")
+
+    def test_rejects_non_http_and_private_image_urls(self):
+        for url in ("file:///etc/passwd", "http://127.0.0.1/image.png"):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                download_image(url)
 
     def test_saves_with_safe_unique_names_and_detected_extension(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -45,6 +50,7 @@ class ArticleStoreTests(unittest.TestCase):
                 markdown.read_text(encoding="utf-8"),
                 "# articles\n\nCompany name\n",
             )
+            self.assertEqual(markdown.name, "articles_jpg.md")
 
 
 if __name__ == "__main__":
